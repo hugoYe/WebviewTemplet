@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">H5GameCenter</string>
+    <string name="game_exit_warn">Press again to quit game</string>
+    <string name="game_center_exit_warn">Press again to quit game center</string>
+</resources>
