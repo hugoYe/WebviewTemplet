@@ -13,7 +13,7 @@ import java.io.InputStream;
 public class AssetsConfigUtil {
 
     private static final String CONFIG_FILE_NAME = "config.ini";
-    
+
     private static AssetsConfigUtil sInstance;
     private Context mContext;
     private JSONObject mConfig;
@@ -97,8 +97,7 @@ public class AssetsConfigUtil {
     }
 
     /**
-     * orientation of the screen.May be one of {@link #SCREEN_ORIENTATION_PORTRAIT}, {@link
-     * #SCREEN_ORIENTATION_LANDSCAPE}.
+     * orientation of the screen.May be one of 0,1
      */
     public int getScreenOrientation() {
         if (mConfig != null) {

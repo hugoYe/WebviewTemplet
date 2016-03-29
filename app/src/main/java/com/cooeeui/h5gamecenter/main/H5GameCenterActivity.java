@@ -18,9 +18,11 @@ public class H5GameCenterActivity extends BaseActivity {
     private final String TAG = H5GameCenterActivity.class.getSimpleName();
 
     private final int PROGRESSBAR_MIN = 10;
+    private final int BACKKEY_RESPONSE_TIME = 5000;
 
     private LinearLayout mCenterLayout;
     private NumberProgressBar mProgressBar;
+    private long mBackKeyResponseTime;
 
     private long mExitTime;
 
@@ -64,17 +66,21 @@ public class H5GameCenterActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mBackKeyResponseTime = System.currentTimeMillis();
     }
 
     @Override
     public void onBackPressed() {
-        if (System.currentTimeMillis() - mExitTime > 2000) {
-            Toast.makeText(this, R.string.game_center_exit_warn, Toast.LENGTH_SHORT)
-                .show();
-            mExitTime = System.currentTimeMillis();
-        } else {
-            super.onBackPressed();
-            finish();
+        // 进入游戏中心5秒后才能操作返回键
+        if (System.currentTimeMillis() - mBackKeyResponseTime > BACKKEY_RESPONSE_TIME) {
+            if (System.currentTimeMillis() - mExitTime > 2000) {
+                Toast.makeText(this, R.string.exit_warn, Toast.LENGTH_SHORT)
+                    .show();
+                mExitTime = System.currentTimeMillis();
+            } else {
+                super.onBackPressed();
+                finish();
+            }
         }
     }
 }

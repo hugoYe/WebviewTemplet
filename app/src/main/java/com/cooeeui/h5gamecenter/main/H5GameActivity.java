@@ -3,6 +3,7 @@ package com.cooeeui.h5gamecenter.main;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
@@ -44,7 +45,7 @@ public class H5GameActivity extends BaseActivity {
                 }
             }
         } else {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
         }
 
     }
@@ -52,14 +53,20 @@ public class H5GameActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         if (System.currentTimeMillis() - mExitTime > 2000) {
-            Toast.makeText(this, R.string.game_exit_warn, Toast.LENGTH_SHORT)
+            Toast.makeText(this, R.string.exit_warn, Toast.LENGTH_SHORT)
                 .show();
             mExitTime = System.currentTimeMillis();
         } else {
             super.onBackPressed();
-            startActivity(new Intent(this, H5GameCenterActivity.class));
-            mWebView.reload();
-            finish();
+            // 如果没有配置游戏中心链接，则直接退出游戏
+            if (AssetsConfigUtil.getsInstance().getGameCenterUrl() == null
+                || TextUtils.isEmpty(AssetsConfigUtil.getsInstance().getGameCenterUrl())) {
+                finish();
+            } else {
+                startActivity(new Intent(this, H5GameCenterActivity.class));
+                mWebView.reload();
+                finish();
+            }
         }
     }
 }

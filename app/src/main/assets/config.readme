@@ -1,4 +1,4 @@
-1. "gameCenterUrl"(游戏中心页面网址):"http://nanohome.cn/launcher/searchPageWithStats/index.html",
+   "gameCenterUrl"(游戏中心页面网址，注意：这个值可以不填，当不填入内容，则apk应用仅仅是1个单独的游戏应用):"http://nanohome.cn/launcher/searchPageWithStats/index.html",
    "gameUrl"(单个游戏网址):"http://games.softgames.de/fly-with-rope/?locale=en&p=cooee.cn",
    "screenOrientation"(屏幕方向："1"--代表竖屏；"0"--代表横屏):"1",
    "UMENG_APPKEY"(友盟统计app key):"123456789",
