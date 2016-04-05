@@ -185,8 +185,9 @@ public class DLTask implements Runnable, IDLThreadListener {
         }
         info.file = new File(info.dirPath, info.fileName);
         if (info.file.exists() && info.file.length() == info.totalBytes) {
-            if (DLCons.DEBUG) {
-                Log.d(TAG, "The file which we want to download was already here.");
+            if (info.hasListener) {
+                info.listener.onFileExist(info.file);
+                DLManager.getInstance(context).removeDLTask(info.baseUrl);
             }
             return;
         }

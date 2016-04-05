@@ -118,6 +118,10 @@ public final class AsyncDListener implements IDListener {
         invokeOnMainThread(OP_ERROR, bundle);
     }
 
+    @Override
+    public void onFileExist(File file) {
+        
+    }
 
     private void invokeOnMainThread(int what, Bundle data) {
         if (mHandlerRef.get() != null) {

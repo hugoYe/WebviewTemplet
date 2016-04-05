@@ -18,4 +18,6 @@ public interface IDListener {
     void onFinish(File file);
 
     void onError(int status, String error);
+
+    void onFileExist(File file);
 }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="downloader_noti_downloading">Downloading...</string>
+    <string name="downloader_noti_pause">Pause</string>
+    <string name="downloader_noti_error">Error</string>
+    <string name="downloader_noti_done">Done!</string>
+</resources>

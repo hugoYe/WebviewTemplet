@@ -82,4 +82,9 @@ public class DLTaskListener implements IDListener {
     public void onError(int status, String error) {
         onError(error);
     }
+
+    @Override
+    public void onFileExist(File file) {
+        
+    }
 }

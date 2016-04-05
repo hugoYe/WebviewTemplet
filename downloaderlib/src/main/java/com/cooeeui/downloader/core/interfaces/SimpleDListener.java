@@ -33,4 +33,9 @@ public class SimpleDListener implements IDListener {
     public void onError(int status, String error) {
 
     }
+
+    @Override
+    public void onFileExist(File file) {
+        
+    }
 }
