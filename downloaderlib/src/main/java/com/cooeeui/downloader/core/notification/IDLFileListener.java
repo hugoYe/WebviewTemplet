@@ -7,6 +7,9 @@ import java.io.File;
  */
 public interface IDLFileListener {
 
+    /**
+     * 文件已经存在的回调函数
+     * */
     void onFileExist(String packageName, File file);
 
 }

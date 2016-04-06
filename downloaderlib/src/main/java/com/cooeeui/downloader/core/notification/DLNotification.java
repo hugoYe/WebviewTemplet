@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.cooeeui.downloader.api.DLManager;
 import com.cooeeui.downloader.api.DLNotificationManager;
+import com.cooeeui.downloader.core.DLError;
 import com.cooeeui.downloader.core.interfaces.IDListener;
 import com.cooeeui.downloaderlib.R;
 
@@ -31,12 +32,6 @@ public class DLNotification implements IDListener {
 
     private static final String TAG = DLNotification.class.getSimpleName();
 
-    private static String ACTION_BUTTON = "downloader.notifications.intent.action.ButtonClick";
-    public final static String INTENT_BUTTONID_TAG = "ButtonId";
-    public final static int BUTTON_CONTINUE_ID = 1; // 继续下载
-    public final static int BUTTON_PAUSE_ID = 2;    // 暂停下载
-    public final static int BUTTON_CANCEL_ID = 3;   // 取消下载
-
     private Context mContext;
     private NotificationManager mNotificationManager;
     public NotificationCompat.Builder mBuilder;
@@ -48,7 +43,14 @@ public class DLNotification implements IDListener {
     private int mNotificationId;
     private int mFileLength;
     private IDLFileListener mFileListener;
+
+    // 通知栏按钮广播
     private ButtonPendingIntentReceiver mBtnReceiver;
+    private String ACTION_BUTTON = "downloader.notifications.intent.action.ButtonClick";
+    private final String INTENT_BUTTONID_TAG = "ButtonId";
+    private final int BUTTON_CONTINUE_ID = 1; // 继续下载
+    private final int BUTTON_PAUSE_ID = 2;    // 暂停下载
+    private final int BUTTON_CANCEL_ID = 3;   // 取消下载
     private final int mButtonLeftViewId = R.id.notification_left_button;
     private final int mButtonRightViewId = R.id.notification_right_button;
 
@@ -141,20 +143,26 @@ public class DLNotification implements IDListener {
     }
 
 
+    /**
+     * 开始下载
+     */
     public void startDLNotification() {
-        initButtonPendingIntentReceiver();
+        registerButtonPendingIntentReceiver();
         mRemoteViews.setTextViewText(R.id.notification_dl_status, mContext.getResources()
             .getText(R.string.downloader_noti_downloading));
         registerButtonPausePendingIntent(mButtonRightViewId);
         DLManager.getInstance(mContext).dlStart(mDownloadUrl, mDownloadPath, this);
     }
 
-    private void initButtonPendingIntentReceiver() {
+    /**
+     * 通知栏按钮广播的注册
+     */
+    private void registerButtonPendingIntentReceiver() {
         if (mBtnReceiver == null) {
             mBtnReceiver = new ButtonPendingIntentReceiver();
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(ACTION_BUTTON);
-            mContext.registerReceiver(mBtnReceiver, intentFilter);
+            mContext.getApplicationContext().registerReceiver(mBtnReceiver, intentFilter);
         }
     }
 
@@ -241,10 +249,13 @@ public class DLNotification implements IDListener {
     @Override
     public void onError(int status, final String error) {
 
-        // 广播注销
-        if (mBtnReceiver != null) {
-            mContext.unregisterReceiver(mBtnReceiver);
-            mBtnReceiver = null;
+        if (status == DLError.ERROR_NOT_NETWORK || status == DLError.ERROR_INVALID_URL
+            || status == DLError.ERROR_OPEN_CONNECT) {
+            // 广播注销
+            if (mBtnReceiver != null) {
+                mContext.getApplicationContext().unregisterReceiver(mBtnReceiver);
+                mBtnReceiver = null;
+            }
         }
 
         new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -257,6 +268,11 @@ public class DLNotification implements IDListener {
 
     @Override
     public void onFileExist(File file) {
+        // 广播注销
+        if (mBtnReceiver != null) {
+            mContext.getApplicationContext().unregisterReceiver(mBtnReceiver);
+            mBtnReceiver = null;
+        }
         launchInstallAction(file);
         if (mFileListener != null) {
             mFileListener.onFileExist(mPackageName, file);
@@ -301,7 +317,7 @@ public class DLNotification implements IDListener {
                                                           Context.MODE_PRIVATE);
                         sp.edit().remove(mPackageName).commit();
                         if (mBtnReceiver != null) {
-                            mContext.unregisterReceiver(mBtnReceiver);
+                            mContext.getApplicationContext().unregisterReceiver(mBtnReceiver);
                             mBtnReceiver = null;
                         }
                         break;
