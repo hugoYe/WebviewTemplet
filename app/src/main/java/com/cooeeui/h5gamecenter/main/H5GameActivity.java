@@ -3,6 +3,7 @@ package com.cooeeui.h5gamecenter.main;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -10,11 +11,17 @@ import android.widget.Toast;
 import com.cooeeui.h5gamecenter.R;
 import com.cooeeui.h5gamecenter.basecore.utils.AssetsConfigUtil;
 import com.cooeeui.h5gamecenter.basecore.views.BaseActivity;
+import com.umeng.analytics.MobclickAgent;
+
+import java.util.HashMap;
 
 public class H5GameActivity extends BaseActivity {
 
     private final String TAG = H5GameActivity.class.getSimpleName();
     private long mExitTime;
+
+    private HashMap<String, String> mNewUsersMap = new HashMap<>();
+    private static final String MAP_KEY = "GameName";
 
 
     @Override
@@ -47,7 +54,21 @@ public class H5GameActivity extends BaseActivity {
         } else {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
         }
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("new_user", true)) {
+            mNewUsersMap.put(MAP_KEY, AssetsConfigUtil.getsInstance().getUmengChannel());
+            MobclickAgent.onEvent(this, "new_user", mNewUsersMap);
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("new_user", false)
+                .commit();
+        }
+
+        // 渠道里填写的其实是应用的名称
+        MobclickAgent.onEvent(this, AssetsConfigUtil.getsInstance().getUmengChannel());
     }
 
     @Override
