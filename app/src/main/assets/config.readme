@@ -3,3 +3,7 @@
    "screenOrientation"(屏幕方向："1"--代表竖屏；"0"--代表横屏):"1",
    "UMENG_APPKEY"(友盟统计app key):"123456789",
    "UMENG_CHANNEL"(友盟统计渠道号):"develop"
+
+
+特别说明：友盟统计的自定义事件的添加，在每个UMENG_APPKEY对应的应用下需要添加“new_user”这个ID的计数事件，事件名称固定为“new_user”。
+UMENG_CHANNEL渠道号用于区别不同的游戏，填写游戏名称，例如“AGame”，添加后需要将这个名称作为统计事件ID，在相应的UMENG_APPKEY下添加计数统计事件。

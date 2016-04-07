@@ -2,7 +2,7 @@
 <resources>
 
     <!-- Notification download begin -->
-    <dimen name="downloader_noti_icon_width">39dp</dimen>
+    <dimen name="downloader_noti_icon_width">40dp</dimen>
     <dimen name="downloader_noti_icon_height">40dp</dimen>
     <dimen name="downloader_noti_icon_margin_left">12dp</dimen>
     <dimen name="downloader_noti_icon_margin_top">10dp</dimen>

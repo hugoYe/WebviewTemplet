@@ -104,3 +104,11 @@
 -keepclassmembers class * {
    public <init>(org.json.JSONObject);
 }
+
+#webview与js交互 add start
+-keepclassmembers class com.cooeeui.h5gamecenter.main.H5GameCenterActivity$JavaScriptObject{
+  public *;
+}
+-keepattributes *Annotation*
+-keepattributes *JavascriptInterface*
+#webview与js交互 add end

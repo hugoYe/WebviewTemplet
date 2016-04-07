@@ -3,11 +3,13 @@ package com.cooeeui.h5gamecenter.main;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.cooeeui.downloader.api.DLNotificationManager;
 import com.cooeeui.h5gamecenter.R;
 import com.cooeeui.h5gamecenter.basecore.utils.AssetsConfigUtil;
 import com.cooeeui.h5gamecenter.basecore.views.BaseActivity;
@@ -56,6 +58,8 @@ public class H5GameCenterActivity extends BaseActivity {
             }
         };
         mWebView.setWebChromeClient(webChromeClient);
+
+        mWebView.addJavascriptInterface(new JavaScriptObject(), "H5GameCenter");
     }
 
     @Override
@@ -82,5 +86,16 @@ public class H5GameCenterActivity extends BaseActivity {
                 finish();
             }
         }
+    }
+
+    public class JavaScriptObject {
+
+        @JavascriptInterface
+        public void downloadGame(String apkurl, String apkPackageName, String apkName,
+                                 String notiIconBase64Str) {
+            DLNotificationManager.getInstance(H5GameCenterActivity.this)
+                .startDLNotification(apkurl, apkPackageName, apkName, notiIconBase64Str);
+        }
+
     }
 }
