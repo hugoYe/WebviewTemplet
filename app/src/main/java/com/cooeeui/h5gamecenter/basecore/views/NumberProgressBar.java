@@ -333,7 +333,6 @@ public class NumberProgressBar extends View {
         if (unreachedBarStart >= getWidth() - getPaddingRight()) {
             mDrawUnreachedBar = false;
         } else {
-            mDrawUnreachedBar = true;
             mUnreachedRectF.left = unreachedBarStart;
             mUnreachedRectF.right = getWidth() - getPaddingRight();
             mUnreachedRectF.top = getHeight() / 2.0f + -mUnreachedBarHeight
@@ -359,6 +358,10 @@ public class NumberProgressBar extends View {
      */
     public float getProgressTextSize() {
         return mTextSize;
+    }
+
+    public void setUnreachedBarDrawStatus(boolean enable) {
+        this.mDrawUnreachedBar = enable;
     }
 
     public int getUnreachedBarColor() {
@@ -399,7 +402,7 @@ public class NumberProgressBar extends View {
 
     public void setUnreachedBarColor(int barColor) {
         this.mUnreachedBarColor = barColor;
-        mUnreachedBarPaint.setColor(mReachedBarColor);
+        mUnreachedBarPaint.setColor(mUnreachedBarColor);
         invalidate();
     }
 
