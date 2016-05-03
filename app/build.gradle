@@ -26,7 +26,7 @@ android {
                 variant.outputs.each { output ->
                     def outputFile = output.outputFile
                     if (outputFile != null && outputFile.name.endsWith('.apk')) {
-                        def fileName = "H5GameCenter_v${defaultConfig.versionName}.apk"
+                        def fileName = "WebviewNews_v${defaultConfig.versionName}.apk"
                         output.outputFile = new File(outputFile.parent, fileName)
                     }
                 }
