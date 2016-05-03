@@ -6,8 +6,8 @@ import android.os.Environment;
 import android.view.View;
 import android.widget.ProgressBar;
 
-import com.cooeeui.downloader.api.DLManager;
-import com.cooeeui.downloader.api.DLNotificationManager;
+//import com.cooeeui.downloader.api.DLManager;
+//import com.cooeeui.downloader.api.DLNotificationManager;
 import com.cooeeui.h5gamecenter.R;
 
 /**
@@ -31,24 +31,24 @@ public class MyTestActivity extends Activity {
     public void onButtonClick(View v) {
         switch (v.getId()) {
             case R.id.bt_dl_start:
-                DLNotificationManager.getInstance(this)
-                    .startDLNotification("http://www.coolauncher.cn/nano/apk/NanoIconPKG.apk",
-                                         "com.cooeeui.iconui", "NanoIconPKG");
+//                DLNotificationManager.getInstance(this)
+//                    .startDLNotification("http://www.coolauncher.cn/nano/apk/NanoIconPKG.apk",
+//                                         "com.cooeeui.iconui", "NanoIconPKG");
                 break;
             case R.id.bt_dl_stop:
-                DLNotificationManager.getInstance(this)
-                    .startDLNotification("http://www.coolauncher.cn/nano/apk/NanoLauncher.apk",
-                                         "com.cooeeui.zenlauncher", "NanoLauncher");
+//                DLNotificationManager.getInstance(this)
+//                    .startDLNotification("http://www.coolauncher.cn/nano/apk/NanoLauncher.apk",
+//                                         "com.cooeeui.zenlauncher", "NanoLauncher");
                 break;
             case R.id.bt_dl_cancel:
-                DLManager.getInstance(MyTestActivity.this).dlCancel(DOWNLOAD_URL);
+//                DLManager.getInstance(MyTestActivity.this).dlCancel(DOWNLOAD_URL);
                 break;
         }
     }
 
     @Override
     protected void onDestroy() {
-        DLManager.getInstance(this).dlStop(DOWNLOAD_URL);
+//        DLManager.getInstance(this).dlStop(DOWNLOAD_URL);
 
         super.onDestroy();
     }
