@@ -7,8 +7,8 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <!-- 友盟统计 umeng end -->
 
+    <!-- 友盟统计 umeng end -->
     <application
             android:name=".main.App"
             android:allowBackup="true"
@@ -18,11 +18,11 @@
             android:largeHeap="true"
             android:persistent="true"
             android:supportsRtl="true">
-
-        <activity android:name=".main.NewsActivity"
-                  android:launchMode="singleTask"
-                  android:screenOrientation="portrait"
-                  android:theme="@style/AppTheme">
+        <activity
+                android:name=".main.news.NewsActivity"
+                android:launchMode="singleTask"
+                android:screenOrientation="portrait"
+                android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -30,7 +30,8 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
-        <!--<activity
+        <!--
+        <activity
                 android:name=".main.H5GameActivity"
                 android:launchMode="singleTask"
                 android:screenOrientation="portrait"
@@ -41,7 +42,8 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
-        </activity>-->
+        </activity>
+        -->
         <!--
         <activity
                 android:name=".main.MyTestActivity"
@@ -56,13 +58,20 @@
             </intent-filter>
         </activity>
         -->
-       <!-- <activity
+        <!--
+        <activity
                 android:name=".main.H5GameCenterActivity"
                 android:launchMode="singleTask"
                 android:screenOrientation="portrait"
                 android:theme="@style/AppTheme">
-        </activity>-->
+        </activity>
+        -->
 
+        <service
+                android:name=".main.news.NewsPushService"
+                android:enabled="true"
+                android:exported="true">
+        </service>
     </application>
 
 </manifest>

@@ -1,7 +1,8 @@
-package com.cooeeui.h5gamecenter.main;
+package com.cooeeui.h5gamecenter.main.news;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -22,7 +23,8 @@ import java.lang.reflect.Method;
 
 public class NewsActivity extends Activity {
 
-    private final String TAG = NewsActivity.class.getSimpleName();
+    private static final String TAG = NewsActivity.class.getSimpleName();
+
 
     private final int PROGRESSBAR_MIN = 10;
 
@@ -38,8 +40,14 @@ public class NewsActivity extends Activity {
 
         setContentView(R.layout.news_main);
         initViews();
+
         mWebView.loadUrl(AssetsConfigUtil.getsInstance().getGameCenterUrl());
+
+        Intent serviceIntent = new Intent();
+        serviceIntent.setClass(getApplicationContext(), NewsPushService.class);
+        startService(serviceIntent);
     }
+
 
     @Override
     protected void onResume() {
@@ -72,7 +80,7 @@ public class NewsActivity extends Activity {
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
                 if (newProgress >= 90) {
-//                    mProgressBar.setVisibility(View.GONE);
+                    mProgressBar.setVisibility(View.GONE);
                 } else {
                     if (mProgressBar.getVisibility() == View.GONE) {
                         mProgressBar.setVisibility(View.VISIBLE);
