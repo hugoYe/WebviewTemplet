@@ -12,10 +12,10 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.cooeeui.h5gamecenter.R;
-import com.cooeeui.h5gamecenter.basecore.utils.ThreadUtil;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -25,12 +25,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Calendar;
+import java.util.Random;
 
 public class NewsPushService extends Service {
+
+    private static final String TAG = NewsPushService.class.getSimpleName();
+    private static final boolean DEBUG = true;
 
     private static final String
         NOTIFICATION_URL =
         "http://server.visualizr.me/magazineServer/getNotificationObject?clientid=trending&baseruri=nano.visualizr.me";
+
+    private boolean mHasNotification_10_12;
+    private boolean mHasNotification_17_19;
+    private boolean mHasNotification_21_22;
+
+    private Random mRandom = new Random();
+
+    private static boolean sThreadIsRunning;
+
 
     public NewsPushService() {
     }
@@ -44,54 +58,106 @@ public class NewsPushService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        ThreadUtil.execute(new Runnable() {
+
+        sThreadIsRunning = true;
+
+        new Thread("NewsPushServiceThread") {
             @Override
             public void run() {
-                InputStream in = null;
+                while (sThreadIsRunning) {
+                    Calendar calendar = Calendar.getInstance();
+                    int hour = calendar.get(Calendar.HOUR_OF_DAY);
+                    if (hour >= 10 && hour <= 12) {
+                        mHasNotification_17_19 = false;
+                        mHasNotification_21_22 = false;
 
-                try {
-                    URL url = new URL(NOTIFICATION_URL);
-                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                    urlConnection.setRequestMethod("GET");
-                    urlConnection.setDoOutput(false);
-                    urlConnection.setConnectTimeout(10000);
-                    urlConnection.setReadTimeout(10000);
-                    urlConnection.setRequestProperty("Connection", "Keep-Alive");
-                    urlConnection.setRequestProperty("Charset", "UTF-8");
+                        if (!mHasNotification_10_12) {
+                            mHasNotification_10_12 = getNotification();
+                            if (DEBUG) {
+                                Log.i(TAG, "mHasNotification_10_12 = " + mHasNotification_10_12);
+                            }
+                        }
+                    } else if (hour >= 17 && hour <= 19) {
+                        mHasNotification_10_12 = false;
+                        mHasNotification_21_22 = false;
 
-                    urlConnection.connect();
-                    in = urlConnection.getInputStream();
+                        if (!mHasNotification_17_19) {
+                            mHasNotification_17_19 = getNotification();
+                            if (DEBUG) {
+                                Log.i(TAG, "mHasNotification_17_19 = " + mHasNotification_17_19);
+                            }
+                        }
+                    } else if (hour >= 21 && hour <= 22) {
+                        mHasNotification_10_12 = false;
+                        mHasNotification_17_19 = false;
 
-                    String res = inputStream2String(in);
-
-                    JSONArray jsonArray = new JSONArray(res);
-                    JSONObject jsonObject = (JSONObject) jsonArray.get(0);
-
-                    String title = jsonObject.getString("title");
-                    String imgUrl = jsonObject.getString("imgUrl");
-                    String detailUrl = jsonObject.getString("url");
-
-                    buildExpandedNotification(title, imgUrl, detailUrl);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    if (in != null) {
-                        try {
-                            in.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        if (!mHasNotification_21_22) {
+                            mHasNotification_21_22 = getNotification();
+                            if (DEBUG) {
+                                Log.i(TAG, "mHasNotification_21_22 = " + mHasNotification_21_22);
+                            }
                         }
                     }
                 }
             }
-        });
+        }.start();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
         return START_STICKY;
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        sThreadIsRunning = false;
+    }
+
+    public boolean getNotification() {
+
+        boolean result = false;
+
+        InputStream in = null;
+        try {
+            URL url = new URL(NOTIFICATION_URL);
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("GET");
+            urlConnection.setDoOutput(false);
+            urlConnection.setConnectTimeout(10000);
+            urlConnection.setReadTimeout(10000);
+            urlConnection.setRequestProperty("Connection", "Keep-Alive");
+            urlConnection.setRequestProperty("Charset", "UTF-8");
+
+            urlConnection.connect();
+            in = urlConnection.getInputStream();
+
+            String res = inputStream2String(in);
+
+            JSONArray jsonArray = new JSONArray(res);
+            JSONObject jsonObject = (JSONObject) jsonArray.get(0);
+
+            String title = jsonObject.getString("title");
+            String imgUrl = jsonObject.getString("imgUrl");
+            String detailUrl = jsonObject.getString("url");
+
+            result = buildExpandedNotification(title, imgUrl, detailUrl);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return result;
+    }
 
     /**
      * 将流转换为String类型
@@ -113,7 +179,8 @@ public class NewsPushService extends Service {
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    public void buildExpandedNotification(String title, String imgUrl, String url) {
+    public boolean buildExpandedNotification(String title, String imgUrl, String url) {
+        boolean result = false;
 
         try {
             Bitmap remotePic = null;
@@ -140,9 +207,15 @@ public class NewsPushService extends Service {
             expandedView.setImageViewBitmap(R.id.iv_news_img, remotePic);
             expandedView.setTextViewText(R.id.tv_news_title, title);
             notification.bigContentView = expandedView;
-            notificationManager.notify(0, notification);
+            notificationManager.notify(mRandom.nextInt(100), notification);
+
+            result = true;
+
+            Log.i(TAG, "buildExpandedNotification = " + result);
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return result;
     }
 }
