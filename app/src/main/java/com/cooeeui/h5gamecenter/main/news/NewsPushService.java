@@ -40,6 +40,9 @@ public class NewsPushService extends Service {
     private static final String SP_KEY_NOTIFICATION_10_12 = "news_notification_10_12";
     private static final String SP_KEY_NOTIFICATION_17_19 = "news_notification_17_19";
     private static final String SP_KEY_NOTIFICATION_21_22 = "news_notification_21_22";
+    private static final String SP_KEY_NOTIFICATION_TIME_HOUR = "news_notification_hour";
+    private static final String SP_KEY_NOTIFICATION_TIME_MINUTE = "news_notification_minute";
+
     private SharedPreferences mSp;
 
     private Random mRandom = new Random();
@@ -69,38 +72,156 @@ public class NewsPushService extends Service {
             public void run() {
                 while (sThreadIsRunning) {
                     Calendar calendar = Calendar.getInstance();
-                    int hour = calendar.get(Calendar.HOUR_OF_DAY);
-                    if (hour >= 10 && hour <= 12) {
-                        mSp.edit().putBoolean(SP_KEY_NOTIFICATION_17_19, false).commit();
-                        mSp.edit().putBoolean(SP_KEY_NOTIFICATION_21_22, false).commit();
-
+                    int curHour = calendar.get(Calendar.HOUR_OF_DAY);
+                    int curMinute = calendar.get(Calendar.MINUTE);
+                    if (curHour >= 10 && curHour < 12) {
                         if (!mSp.getBoolean(SP_KEY_NOTIFICATION_10_12, false)) {
-                            boolean rst = getNotification();
-                            mSp.edit().putBoolean(SP_KEY_NOTIFICATION_10_12, rst).commit();
-                            if (DEBUG) {
-                                Log.i(TAG, "SP_KEY_NOTIFICATION_10_12 = " + rst);
+                            if (mSp.getInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1) == -1
+                                || mSp.getInt(SP_KEY_NOTIFICATION_TIME_MINUTE, -1) == -1) {
+                                int minute = mRandom.nextInt(120);
+                                if (DEBUG) {
+                                    Log.i(TAG, "SP_KEY_NOTIFICATION_10_12 radomMinute = " + minute);
+                                }
+                                if ((minute - 60) < 0) {
+                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, 10).commit();
+                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, minute)
+                                        .commit();
+                                } else if ((minute - 60) == 0) {
+                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, 11).commit();
+                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, 0)
+                                        .commit();
+                                } else if ((minute - 60) > 0) {
+                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, 11).commit();
+                                    mSp.edit()
+                                        .putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, (minute - 60))
+                                        .commit();
+                                }
+                            }
+                            if (curHour == mSp.getInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1)
+                                && curMinute == mSp.getInt(SP_KEY_NOTIFICATION_TIME_MINUTE, -1)) {
+                                boolean rst = getNotification();
+                                mSp.edit().putBoolean(SP_KEY_NOTIFICATION_10_12, rst).commit();
+                                mSp.edit().putBoolean(SP_KEY_NOTIFICATION_17_19, false).commit();
+                                mSp.edit().putBoolean(SP_KEY_NOTIFICATION_21_22, false).commit();
+                                if (rst) {
+                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1).commit();
+                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, -1).commit();
+                                } else {
+                                    int minute = mSp.getInt(SP_KEY_NOTIFICATION_TIME_MINUTE, -1);
+                                    if ((minute + 1) < 60) {
+                                        mSp.edit()
+                                            .putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, (minute + 1))
+                                            .commit();
+                                    } else if ((minute + 1) == 60) {
+                                        int hour = mSp.getInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1);
+                                        mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, (hour + 1))
+                                            .commit();
+                                        mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, 0)
+                                            .commit();
+                                    } else if ((minute + 1) > 60) {
+                                        int hour = mSp.getInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1);
+                                        mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, (hour + 1))
+                                            .commit();
+                                        mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE,
+                                                          (minute + 1 - 60)).commit();
+                                    }
+                                }
+                                if (DEBUG) {
+                                    Log.i(TAG, "SP_KEY_NOTIFICATION_10_12 = " + rst);
+                                }
                             }
                         }
-                    } else if (hour >= 17 && hour <= 19) {
-                        mSp.edit().putBoolean(SP_KEY_NOTIFICATION_10_12, false).commit();
-                        mSp.edit().putBoolean(SP_KEY_NOTIFICATION_21_22, false).commit();
-
+                    } else if (curHour >= 17 && curHour < 19) {
                         if (!mSp.getBoolean(SP_KEY_NOTIFICATION_17_19, false)) {
-                            boolean rst = getNotification();
-                            mSp.edit().putBoolean(SP_KEY_NOTIFICATION_17_19, rst).commit();
-                            if (DEBUG) {
-                                Log.i(TAG, "SP_KEY_NOTIFICATION_17_19 = " + rst);
+                            if (mSp.getInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1) == -1
+                                || mSp.getInt(SP_KEY_NOTIFICATION_TIME_MINUTE, -1) == -1) {
+                                int minute = mRandom.nextInt(120);
+                                if (DEBUG) {
+                                    Log.i(TAG, "SP_KEY_NOTIFICATION_17_19 radomMinute = " + minute);
+                                }
+                                if ((minute - 60) < 0) {
+                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, 17).commit();
+                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, minute)
+                                        .commit();
+                                } else if ((minute - 60) == 0) {
+                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, 18).commit();
+                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, 0)
+                                        .commit();
+                                } else if ((minute - 60) > 0) {
+                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, 18).commit();
+                                    mSp.edit()
+                                        .putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, (minute - 60))
+                                        .commit();
+                                }
+                            }
+                            if (curHour == mSp.getInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1)
+                                && curMinute == mSp.getInt(SP_KEY_NOTIFICATION_TIME_MINUTE, -1)) {
+                                boolean rst = getNotification();
+                                mSp.edit().putBoolean(SP_KEY_NOTIFICATION_17_19, rst).commit();
+                                mSp.edit().putBoolean(SP_KEY_NOTIFICATION_10_12, false).commit();
+                                mSp.edit().putBoolean(SP_KEY_NOTIFICATION_21_22, false).commit();
+                                if (rst) {
+                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1).commit();
+                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, -1).commit();
+                                } else {
+                                    int minute = mSp.getInt(SP_KEY_NOTIFICATION_TIME_MINUTE, -1);
+                                    if ((minute + 1) < 60) {
+                                        mSp.edit()
+                                            .putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, (minute + 1))
+                                            .commit();
+                                    } else if ((minute + 1) == 60) {
+                                        int hour = mSp.getInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1);
+                                        mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, (hour + 1))
+                                            .commit();
+                                        mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, 0)
+                                            .commit();
+                                    } else if ((minute + 1) > 60) {
+                                        int hour = mSp.getInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1);
+                                        mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, (hour + 1))
+                                            .commit();
+                                        mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE,
+                                                          (minute + 1 - 60)).commit();
+                                    }
+                                }
+                                if (DEBUG) {
+                                    Log.i(TAG, "SP_KEY_NOTIFICATION_17_19 = " + rst);
+                                }
                             }
                         }
-                    } else if (hour >= 21 && hour <= 22) {
-                        mSp.edit().putBoolean(SP_KEY_NOTIFICATION_10_12, false).commit();
-                        mSp.edit().putBoolean(SP_KEY_NOTIFICATION_17_19, false).commit();
-
+                    } else if (curHour >= 21 && curHour < 22) {
                         if (!mSp.getBoolean(SP_KEY_NOTIFICATION_21_22, false)) {
-                            boolean rst = getNotification();
-                            mSp.edit().putBoolean(SP_KEY_NOTIFICATION_21_22, rst).commit();
-                            if (DEBUG) {
-                                Log.i(TAG, "SP_KEY_NOTIFICATION_21_22 = " + rst);
+                            if (mSp.getInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1) == -1
+                                || mSp.getInt(SP_KEY_NOTIFICATION_TIME_MINUTE, -1) == -1) {
+                                int minute = mRandom.nextInt(60);
+                                if (DEBUG) {
+                                    Log.i(TAG, "SP_KEY_NOTIFICATION_21_22 radomMinute = " + minute);
+                                }
+                                if ((minute - 60) < 0) {
+                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, 21).commit();
+                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, minute)
+                                        .commit();
+                                }
+                            }
+                            if (curHour == mSp.getInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1)
+                                && curMinute == mSp.getInt(SP_KEY_NOTIFICATION_TIME_MINUTE, -1)) {
+                                boolean rst = getNotification();
+                                mSp.edit().putBoolean(SP_KEY_NOTIFICATION_21_22, rst).commit();
+                                mSp.edit().putBoolean(SP_KEY_NOTIFICATION_10_12, false).commit();
+                                mSp.edit().putBoolean(SP_KEY_NOTIFICATION_17_19, false).commit();
+                                if (rst) {
+                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1).commit();
+                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, -1).commit();
+                                } else {
+                                    int minute = mSp.getInt(SP_KEY_NOTIFICATION_TIME_MINUTE, -1);
+                                    if ((minute + 1) < 60) {
+                                        mSp.edit()
+                                            .putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, (minute + 1))
+                                            .commit();
+                                    }
+                                }
+                                if (DEBUG) {
+                                    Log.i(TAG, "SP_KEY_NOTIFICATION_21_22 = " + rst);
+                                }
                             }
                         }
                     }
