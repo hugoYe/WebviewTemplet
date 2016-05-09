@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">新闻流</string>
+    <string name="exit_warn">再按一次退出</string>
+</resources>
