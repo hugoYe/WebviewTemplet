@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
@@ -35,9 +36,11 @@ public class NewsPushService extends Service {
     private static final String TAG = NewsPushService.class.getSimpleName();
     private static final boolean DEBUG = false;
 
-    private boolean mHasNotification_10_12;
-    private boolean mHasNotification_17_19;
-    private boolean mHasNotification_21_22;
+    private static final String SP_FILE_NAME = "news_notification";
+    private static final String SP_KEY_NOTIFICATION_10_12 = "news_notification_10_12";
+    private static final String SP_KEY_NOTIFICATION_17_19 = "news_notification_17_19";
+    private static final String SP_KEY_NOTIFICATION_21_22 = "news_notification_21_22";
+    private SharedPreferences mSp;
 
     private Random mRandom = new Random();
 
@@ -57,6 +60,8 @@ public class NewsPushService extends Service {
     public void onCreate() {
         super.onCreate();
 
+        mSp = getSharedPreferences(SP_FILE_NAME, Context.MODE_PRIVATE);
+
         sThreadIsRunning = true;
 
         new Thread("NewsPushServiceThread") {
@@ -66,33 +71,36 @@ public class NewsPushService extends Service {
                     Calendar calendar = Calendar.getInstance();
                     int hour = calendar.get(Calendar.HOUR_OF_DAY);
                     if (hour >= 10 && hour <= 12) {
-                        mHasNotification_17_19 = false;
-                        mHasNotification_21_22 = false;
+                        mSp.edit().putBoolean(SP_KEY_NOTIFICATION_17_19, false).commit();
+                        mSp.edit().putBoolean(SP_KEY_NOTIFICATION_21_22, false).commit();
 
-                        if (!mHasNotification_10_12) {
-                            mHasNotification_10_12 = getNotification();
+                        if (!mSp.getBoolean(SP_KEY_NOTIFICATION_10_12, false)) {
+                            boolean rst = getNotification();
+                            mSp.edit().putBoolean(SP_KEY_NOTIFICATION_10_12, rst).commit();
                             if (DEBUG) {
-                                Log.i(TAG, "mHasNotification_10_12 = " + mHasNotification_10_12);
+                                Log.i(TAG, "SP_KEY_NOTIFICATION_10_12 = " + rst);
                             }
                         }
                     } else if (hour >= 17 && hour <= 19) {
-                        mHasNotification_10_12 = false;
-                        mHasNotification_21_22 = false;
+                        mSp.edit().putBoolean(SP_KEY_NOTIFICATION_10_12, false).commit();
+                        mSp.edit().putBoolean(SP_KEY_NOTIFICATION_21_22, false).commit();
 
-                        if (!mHasNotification_17_19) {
-                            mHasNotification_17_19 = getNotification();
+                        if (!mSp.getBoolean(SP_KEY_NOTIFICATION_17_19, false)) {
+                            boolean rst = getNotification();
+                            mSp.edit().putBoolean(SP_KEY_NOTIFICATION_17_19, rst).commit();
                             if (DEBUG) {
-                                Log.i(TAG, "mHasNotification_17_19 = " + mHasNotification_17_19);
+                                Log.i(TAG, "SP_KEY_NOTIFICATION_17_19 = " + rst);
                             }
                         }
                     } else if (hour >= 21 && hour <= 22) {
-                        mHasNotification_10_12 = false;
-                        mHasNotification_17_19 = false;
+                        mSp.edit().putBoolean(SP_KEY_NOTIFICATION_10_12, false).commit();
+                        mSp.edit().putBoolean(SP_KEY_NOTIFICATION_17_19, false).commit();
 
-                        if (!mHasNotification_21_22) {
-                            mHasNotification_21_22 = getNotification();
+                        if (!mSp.getBoolean(SP_KEY_NOTIFICATION_21_22, false)) {
+                            boolean rst = getNotification();
+                            mSp.edit().putBoolean(SP_KEY_NOTIFICATION_21_22, rst).commit();
                             if (DEBUG) {
-                                Log.i(TAG, "mHasNotification_21_22 = " + mHasNotification_21_22);
+                                Log.i(TAG, "SP_KEY_NOTIFICATION_21_22 = " + rst);
                             }
                         }
                     }
