@@ -18,6 +18,7 @@ import com.cooeeui.h5gamecenter.R;
 import com.cooeeui.h5gamecenter.basecore.utils.AssetsConfigUtil;
 import com.cooeeui.h5gamecenter.basecore.views.NumberProgressBar;
 import com.umeng.analytics.MobclickAgent;
+import com.umeng.update.UmengUpdateAgent;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -48,6 +49,8 @@ public class NewsActivity extends Activity {
         Intent serviceIntent = new Intent();
         serviceIntent.setClass(getApplicationContext(), NewsPushService.class);
         startService(serviceIntent);
+
+        UmengUpdateAgent.update(this);
     }
 
 
