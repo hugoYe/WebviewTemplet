@@ -142,6 +142,20 @@ public class NewsPushService extends Service {
 
             String res = inputStream2String(in);
 
+            url = new URL(res);
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("GET");
+            urlConnection.setDoOutput(false);
+            urlConnection.setConnectTimeout(10000);
+            urlConnection.setReadTimeout(10000);
+            urlConnection.setRequestProperty("Connection", "Keep-Alive");
+            urlConnection.setRequestProperty("Charset", "UTF-8");
+
+            urlConnection.connect();
+            in = urlConnection.getInputStream();
+
+            res = inputStream2String(in);
+
             JSONArray jsonArray = new JSONArray(res);
             JSONObject jsonObject = (JSONObject) jsonArray.get(0);
 
