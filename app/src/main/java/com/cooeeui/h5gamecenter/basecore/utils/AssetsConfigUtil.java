@@ -135,4 +135,28 @@ public class AssetsConfigUtil {
         return null;
     }
 
+    public String getNesUrl() {
+        if (mConfig != null) {
+            try {
+                String url = mConfig.getString("news_url");
+                return url;
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public String getNewsNotificationUrl() {
+        if (mConfig != null) {
+            try {
+                String url = mConfig.getString("news_notification_url");
+                return url;
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
 }

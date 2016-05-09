@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +25,7 @@ import java.lang.reflect.Method;
 public class NewsActivity extends Activity {
 
     private static final String TAG = NewsActivity.class.getSimpleName();
-
+    private static final boolean DEBUG = false;
 
     private final int PROGRESSBAR_MIN = 10;
 
@@ -34,6 +35,7 @@ public class NewsActivity extends Activity {
 
     private long mExitTime;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +43,7 @@ public class NewsActivity extends Activity {
         setContentView(R.layout.news_main);
         initViews();
 
-        mWebView.loadUrl(AssetsConfigUtil.getsInstance().getGameCenterUrl());
+        mWebView.loadUrl(AssetsConfigUtil.getsInstance().getNesUrl());
 
         Intent serviceIntent = new Intent();
         serviceIntent.setClass(getApplicationContext(), NewsPushService.class);
@@ -53,6 +55,22 @@ public class NewsActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
+        if (DEBUG) {
+            Log.i(TAG, "onResume");
+        }
+        final Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("detailUrl")) {
+            if (DEBUG) {
+                Log.i(TAG, "intent.hasExtra = " + intent.getStringExtra("detailUrl"));
+            }
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mWebView.loadUrl(intent.getStringExtra("detailUrl"));
+                }
+            }, 1500);
+        }
+
         // umeng analytics
         MobclickAgent.onResume(this);
     }
@@ -63,6 +81,20 @@ public class NewsActivity extends Activity {
 
         // umeng analytics
         MobclickAgent.onPause(this);
+    }
+
+    protected void onNewIntent(Intent intent) {
+        if (DEBUG) {
+            Log.i(TAG, "onNewIntent");
+        }
+        if (intent != null && intent.hasExtra("detailUrl")) {
+            if (DEBUG) {
+                Log.i(TAG, "intent.hasExtra = " + intent.getStringExtra("detailUrl"));
+            }
+            mWebView.loadUrl(intent.getStringExtra("detailUrl"));
+        }
+//        super.onNewIntent(intent);
+//        setIntent(intent);  // must store the new intent unless getIntent() will return the old one
     }
 
 
@@ -181,6 +213,7 @@ public class NewsActivity extends Activity {
             mWebView.goBack();
             return;
         }
+
         if (System.currentTimeMillis() - mExitTime > 2000) {
             Toast.makeText(this, R.string.exit_warn, Toast.LENGTH_SHORT)
                 .show();

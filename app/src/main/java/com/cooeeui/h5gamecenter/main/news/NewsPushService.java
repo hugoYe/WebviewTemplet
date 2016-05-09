@@ -16,6 +16,7 @@ import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.cooeeui.h5gamecenter.R;
+import com.cooeeui.h5gamecenter.basecore.utils.AssetsConfigUtil;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -27,15 +28,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Random;
+import java.util.UUID;
 
 public class NewsPushService extends Service {
 
     private static final String TAG = NewsPushService.class.getSimpleName();
-    private static final boolean DEBUG = true;
-
-    private static final String
-        NOTIFICATION_URL =
-        "http://server.visualizr.me/magazineServer/getNotificationObject?clientid=trending&baseruri=nano.visualizr.me";
+    private static final boolean DEBUG = false;
 
     private boolean mHasNotification_10_12;
     private boolean mHasNotification_17_19;
@@ -122,7 +120,7 @@ public class NewsPushService extends Service {
 
         InputStream in = null;
         try {
-            URL url = new URL(NOTIFICATION_URL);
+            URL url = new URL(AssetsConfigUtil.getsInstance().getNewsNotificationUrl());
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
             urlConnection.setDoOutput(false);
@@ -193,7 +191,8 @@ public class NewsPushService extends Service {
             Intent notiIntent = new Intent(getApplicationContext(), NewsActivity.class);
             notiIntent.putExtra("detailUrl", url);
             PendingIntent intent =
-                PendingIntent.getActivity(getApplicationContext(), 0, notiIntent, 0);
+                PendingIntent.getActivity(getApplicationContext(), UUID.randomUUID().hashCode(),
+                                          notiIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             Notification notification = new NotificationCompat.Builder(getApplicationContext())
                 .setSmallIcon(R.mipmap.ic_launcher)
@@ -211,7 +210,9 @@ public class NewsPushService extends Service {
 
             result = true;
 
-            Log.i(TAG, "buildExpandedNotification = " + result);
+            if (DEBUG) {
+                Log.i(TAG, "buildExpandedNotification = " + result);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
