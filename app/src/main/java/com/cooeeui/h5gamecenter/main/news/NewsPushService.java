@@ -42,6 +42,12 @@ public class NewsPushService extends Service {
     private static final String SP_KEY_NOTIFICATION_21_22 = "news_notification_21_22";
     private static final String SP_KEY_NOTIFICATION_TIME_HOUR = "news_notification_hour";
     private static final String SP_KEY_NOTIFICATION_TIME_MINUTE = "news_notification_minute";
+    private static final String SP_KEY_NOTIFICATION_10_12_RANDOM_TIME =
+        "news_notification_10_12_random_time";
+    private static final String SP_KEY_NOTIFICATION_17_19_RANDOM_TIME =
+        "news_notification_17_19_random_time";
+    private static final String SP_KEY_NOTIFICATION_21_22_RANDOM_TIME =
+        "news_notification_21_22_random_time";
 
     private SharedPreferences mSp;
 
@@ -75,67 +81,17 @@ public class NewsPushService extends Service {
             public void run() {
                 while (sThreadIsRunning) {
 
-                    // 亮屏时每隔10秒计算一次，减轻cpu压力，从而减少电量损耗
-                    try {
-                        Thread.sleep(10000);    // 10*1000  10秒
-                    } catch (InterruptedException e) {
-                        //
-                    }
-
                     Calendar calendar = Calendar.getInstance();
                     int curHour = calendar.get(Calendar.HOUR_OF_DAY);
                     int curMinute = calendar.get(Calendar.MINUTE);
 
-                    // 不在要求时间段内，挂起线程，减少cpu压力，从而减少电量损耗
-                    if (curHour >= 1 && curHour < 10) {
-                        try {
-                            Thread.sleep((10 - curHour) * 60 * 60 * 1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    } else if (curHour >= 12 && curHour < 17) {
-                        try {
-                            Thread.sleep((17 - curHour) * 60 * 60 * 1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    } else if (curHour >= 19 && curHour < 21) {
-                        try {
-                            Thread.sleep((21 - curHour) * 60 * 60 * 1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    } else if (curHour >= 22 && curHour < 24) {
-                        try {
-                            Thread.sleep((22 - curHour) * 60 * 60 * 1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                    threadNeedToSleep(curHour);
 
                     if (curHour >= 10 && curHour < 12) {
                         if (!mSp.getBoolean(SP_KEY_NOTIFICATION_10_12, false)) {
-                            if (mSp.getInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1) == -1
-                                || mSp.getInt(SP_KEY_NOTIFICATION_TIME_MINUTE, -1) == -1) {
-                                int minute = mRandom.nextInt(120);
-                                if (DEBUG) {
-                                    Log.i(TAG, "SP_KEY_NOTIFICATION_10_12 radomMinute = " + minute);
-                                }
-                                if ((minute - 60) < 0) {
-                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, 10).commit();
-                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, minute)
-                                        .commit();
-                                } else if ((minute - 60) == 0) {
-                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, 11).commit();
-                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, 0)
-                                        .commit();
-                                } else if ((minute - 60) > 0) {
-                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, 11).commit();
-                                    mSp.edit()
-                                        .putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, (minute - 60))
-                                        .commit();
-                                }
-                            }
+
+                            randomTime_10_12(curHour, curMinute);
+
                             if (curHour == mSp.getInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1)
                                 && curMinute == mSp.getInt(SP_KEY_NOTIFICATION_TIME_MINUTE, -1)) {
                                 boolean rst = getNotification();
@@ -172,27 +128,9 @@ public class NewsPushService extends Service {
                         }
                     } else if (curHour >= 17 && curHour < 19) {
                         if (!mSp.getBoolean(SP_KEY_NOTIFICATION_17_19, false)) {
-                            if (mSp.getInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1) == -1
-                                || mSp.getInt(SP_KEY_NOTIFICATION_TIME_MINUTE, -1) == -1) {
-                                int minute = mRandom.nextInt(120);
-                                if (DEBUG) {
-                                    Log.i(TAG, "SP_KEY_NOTIFICATION_17_19 radomMinute = " + minute);
-                                }
-                                if ((minute - 60) < 0) {
-                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, 17).commit();
-                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, minute)
-                                        .commit();
-                                } else if ((minute - 60) == 0) {
-                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, 18).commit();
-                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, 0)
-                                        .commit();
-                                } else if ((minute - 60) > 0) {
-                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, 18).commit();
-                                    mSp.edit()
-                                        .putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, (minute - 60))
-                                        .commit();
-                                }
-                            }
+
+                            randomTime_17_19(curHour, curMinute);
+
                             if (curHour == mSp.getInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1)
                                 && curMinute == mSp.getInt(SP_KEY_NOTIFICATION_TIME_MINUTE, -1)) {
                                 boolean rst = getNotification();
@@ -229,18 +167,9 @@ public class NewsPushService extends Service {
                         }
                     } else if (curHour >= 21 && curHour < 22) {
                         if (!mSp.getBoolean(SP_KEY_NOTIFICATION_21_22, false)) {
-                            if (mSp.getInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1) == -1
-                                || mSp.getInt(SP_KEY_NOTIFICATION_TIME_MINUTE, -1) == -1) {
-                                int minute = mRandom.nextInt(60);
-                                if (DEBUG) {
-                                    Log.i(TAG, "SP_KEY_NOTIFICATION_21_22 radomMinute = " + minute);
-                                }
-                                if ((minute - 60) < 0) {
-                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, 21).commit();
-                                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, minute)
-                                        .commit();
-                                }
-                            }
+
+                            randomTime_21_22(curHour, curMinute);
+
                             if (curHour == mSp.getInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1)
                                 && curMinute == mSp.getInt(SP_KEY_NOTIFICATION_TIME_MINUTE, -1)) {
                                 boolean rst = getNotification();
@@ -263,6 +192,16 @@ public class NewsPushService extends Service {
                                 }
                             }
                         }
+                    }
+
+                    // 亮屏时每隔10秒计算一次，减轻cpu压力，从而减少电量损耗
+                    try {
+                        if (DEBUG) {
+                            Log.i(TAG, "thread sleep = " + 15000);
+                        }
+                        Thread.sleep(15000);    // 15*1000  15秒
+                    } catch (InterruptedException e) {
+                        //
                     }
                 }
             }
@@ -402,6 +341,170 @@ public class NewsPushService extends Service {
         }
 
         return result;
+    }
+
+    private void threadNeedToSleep(int curHour) {
+        // 不在要求时间段内，挂起线程，减少cpu压力，从而减少电量损耗
+        if (curHour >= 1 && curHour < 10) {
+            try {
+                if (DEBUG) {
+                    Log.i(TAG, "thread sleep " + (9 - curHour) + " hour between 1 and 10 !");
+                }
+                Thread.sleep((9 - curHour) * 60 * 60 * 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else if (curHour >= 12 && curHour < 17) {
+            try {
+                if (DEBUG) {
+                    Log.i(TAG, "thread sleep " + (16 - curHour) + " hour between 12 and 17 !");
+                }
+                Thread.sleep((16 - curHour) * 60 * 60 * 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else if (curHour >= 19 && curHour < 21) {
+            try {
+                if (DEBUG) {
+                    Log.i(TAG, "thread sleep " + (20 - curHour) + " hour between 19 and 21 !");
+                }
+                Thread.sleep((20 - curHour) * 60 * 60 * 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else if (curHour >= 22 && curHour < 24) {
+            try {
+                if (DEBUG) {
+                    Log.i(TAG, "thread sleep " + (23 - curHour) + " hour between 22 and 24 !");
+                }
+                Thread.sleep((23 - curHour) * 60 * 60 * 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void randomTime_10_12(int curHour, int curMinute) {
+        if (!mSp.getBoolean(SP_KEY_NOTIFICATION_10_12_RANDOM_TIME, false)) {
+            int radomMinute = mRandom.nextInt(60);
+            if (DEBUG) {
+                Log.i(TAG,
+                      "SP_KEY_NOTIFICATION_10_12_RANDOM_TIME radomMinute = " + radomMinute);
+            }
+            if ((radomMinute + curMinute) < 60) {
+                mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, curHour)
+                    .commit();
+                mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE,
+                                  (radomMinute + curMinute)).commit();
+            } else if ((radomMinute + curMinute) > 60) {
+                if (curHour == 11) {
+                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, curHour)
+                        .commit();
+                    mSp.edit()
+                        .putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, curMinute)
+                        .commit();
+                } else {
+                    mSp.edit()
+                        .putInt(SP_KEY_NOTIFICATION_TIME_HOUR, curHour + 1)
+                        .commit();
+                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE,
+                                      (radomMinute + curMinute - 60)).commit();
+                }
+            } else {
+                mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, curHour)
+                    .commit();
+                mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, curMinute)
+                    .commit();
+            }
+
+            if (DEBUG) {
+                Log.i(TAG, "SP_KEY_NOTIFICATION_TIME_HOUR = " + mSp
+                    .getInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1));
+                Log.i(TAG, "SP_KEY_NOTIFICATION_TIME_MINUTE = " + mSp
+                    .getInt(SP_KEY_NOTIFICATION_TIME_MINUTE, -1));
+            }
+
+            mSp.edit().putBoolean(SP_KEY_NOTIFICATION_10_12_RANDOM_TIME, true).commit();
+            mSp.edit().putBoolean(SP_KEY_NOTIFICATION_17_19_RANDOM_TIME, false).commit();
+            mSp.edit().putBoolean(SP_KEY_NOTIFICATION_21_22_RANDOM_TIME, false).commit();
+        }
+    }
+
+    private void randomTime_17_19(int curHour, int curMinute) {
+        if (!mSp.getBoolean(SP_KEY_NOTIFICATION_17_19_RANDOM_TIME, false)) {
+            int radomMinute = mRandom.nextInt(60);
+            if (DEBUG) {
+                Log.i(TAG, "SP_KEY_NOTIFICATION_17_19_RANDOM_TIME radomMinute = " + radomMinute);
+            }
+            if ((radomMinute + curMinute) < 60) {
+                mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, curHour)
+                    .commit();
+                mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE,
+                                  (radomMinute + curMinute)).commit();
+            } else if ((radomMinute + curMinute) > 60) {
+                if (curHour == 18) {
+                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, curHour)
+                        .commit();
+                    mSp.edit()
+                        .putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, curMinute)
+                        .commit();
+                } else {
+                    mSp.edit()
+                        .putInt(SP_KEY_NOTIFICATION_TIME_HOUR, curHour + 1)
+                        .commit();
+                    mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE,
+                                      (radomMinute + curMinute - 60)).commit();
+                }
+            } else {
+                mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, curHour)
+                    .commit();
+                mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, curMinute)
+                    .commit();
+            }
+
+            if (DEBUG) {
+                Log.i(TAG, "SP_KEY_NOTIFICATION_TIME_HOUR = " + mSp
+                    .getInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1));
+                Log.i(TAG, "SP_KEY_NOTIFICATION_TIME_MINUTE = " + mSp
+                    .getInt(SP_KEY_NOTIFICATION_TIME_MINUTE, -1));
+            }
+
+            mSp.edit().putBoolean(SP_KEY_NOTIFICATION_17_19_RANDOM_TIME, true).commit();
+            mSp.edit().putBoolean(SP_KEY_NOTIFICATION_10_12_RANDOM_TIME, false).commit();
+            mSp.edit().putBoolean(SP_KEY_NOTIFICATION_21_22_RANDOM_TIME, false).commit();
+        }
+    }
+
+
+    private void randomTime_21_22(int curHour, int curMinute) {
+        if (!mSp.getBoolean(SP_KEY_NOTIFICATION_21_22_RANDOM_TIME, false)) {
+            int radomMinute = mRandom.nextInt(60);
+            if (DEBUG) {
+                Log.i(TAG, "SP_KEY_NOTIFICATION_21_22_RANDOM_TIME radomMinute = " + radomMinute);
+            }
+            if ((radomMinute + curMinute) < 60) {
+                mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, curHour)
+                    .commit();
+                mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE,
+                                  (radomMinute + curMinute)).commit();
+            } else {
+                mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_HOUR, curHour)
+                    .commit();
+                mSp.edit().putInt(SP_KEY_NOTIFICATION_TIME_MINUTE, curMinute)
+                    .commit();
+            }
+
+            if (DEBUG) {
+                Log.i(TAG, "SP_KEY_NOTIFICATION_TIME_HOUR = " + mSp
+                    .getInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1));
+                Log.i(TAG, "SP_KEY_NOTIFICATION_TIME_MINUTE = " + mSp
+                    .getInt(SP_KEY_NOTIFICATION_TIME_MINUTE, -1));
+            }
+
+            mSp.edit().putBoolean(SP_KEY_NOTIFICATION_21_22_RANDOM_TIME, true).commit();
+            mSp.edit().putBoolean(SP_KEY_NOTIFICATION_10_12_RANDOM_TIME, false).commit();
+            mSp.edit().putBoolean(SP_KEY_NOTIFICATION_17_19_RANDOM_TIME, false).commit();
+        }
     }
 
 //    @Override
