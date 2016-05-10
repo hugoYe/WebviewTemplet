@@ -46,6 +46,8 @@ public class NewsPushService extends Service {
     private SharedPreferences mSp;
 
     private Random mRandom = new Random();
+//    private ScreenReceiver mScreenReceiver = new ScreenReceiver();
+//    private static boolean screenIsOff;
 
     private static boolean sThreadIsRunning;
 
@@ -64,6 +66,7 @@ public class NewsPushService extends Service {
         super.onCreate();
 
         mSp = getSharedPreferences(SP_FILE_NAME, Context.MODE_PRIVATE);
+//        mScreenReceiver.registerScreenReceiver(getApplicationContext(), this);
 
         sThreadIsRunning = true;
 
@@ -71,9 +74,45 @@ public class NewsPushService extends Service {
             @Override
             public void run() {
                 while (sThreadIsRunning) {
+
+                    // 亮屏时每隔10秒计算一次，减轻cpu压力，从而减少电量损耗
+                    try {
+                        Thread.sleep(10000);    // 10*1000  10秒
+                    } catch (InterruptedException e) {
+                        //
+                    }
+
                     Calendar calendar = Calendar.getInstance();
                     int curHour = calendar.get(Calendar.HOUR_OF_DAY);
                     int curMinute = calendar.get(Calendar.MINUTE);
+
+                    // 不在要求时间段内，挂起线程，减少cpu压力，从而减少电量损耗
+                    if (curHour >= 1 && curHour < 10) {
+                        try {
+                            Thread.sleep((10 - curHour) * 60 * 60 * 1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    } else if (curHour >= 12 && curHour < 17) {
+                        try {
+                            Thread.sleep((17 - curHour) * 60 * 60 * 1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    } else if (curHour >= 19 && curHour < 21) {
+                        try {
+                            Thread.sleep((21 - curHour) * 60 * 60 * 1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    } else if (curHour >= 22 && curHour < 24) {
+                        try {
+                            Thread.sleep((22 - curHour) * 60 * 60 * 1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
                     if (curHour >= 10 && curHour < 12) {
                         if (!mSp.getBoolean(SP_KEY_NOTIFICATION_10_12, false)) {
                             if (mSp.getInt(SP_KEY_NOTIFICATION_TIME_HOUR, -1) == -1
@@ -240,6 +279,8 @@ public class NewsPushService extends Service {
     public void onDestroy() {
         super.onDestroy();
 
+//        mScreenReceiver.unRegisterScreenReceiver(getApplicationContext());
+
         sThreadIsRunning = false;
     }
 
@@ -362,4 +403,14 @@ public class NewsPushService extends Service {
 
         return result;
     }
+
+//    @Override
+//    public void screenOn() {
+//        screenIsOff = false;
+//    }
+//
+//    @Override
+//    public void screenOff() {
+//        screenIsOff = true;
+//    }
 }
