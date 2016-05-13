@@ -35,6 +35,7 @@ public class NewsPushService extends Service {
 
     private static final String TAG = NewsPushService.class.getSimpleName();
     private static final boolean DEBUG = false;
+    private static final boolean TEST = false;
 
     private static final String SP_FILE_NAME = "news_notification";
     private static final String SP_KEY_NOTIFICATION_10_12 = "news_notification_10_12";
@@ -350,7 +351,9 @@ public class NewsPushService extends Service {
                 if (DEBUG) {
                     Log.i(TAG, "thread sleep " + (9 - curHour) + " hour between 1 and 10 !");
                 }
-                Thread.sleep((9 - curHour) * 60 * 60 * 1000);
+                if (!TEST) {
+                    Thread.sleep((9 - curHour) * 60 * 60 * 1000);
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -359,7 +362,9 @@ public class NewsPushService extends Service {
                 if (DEBUG) {
                     Log.i(TAG, "thread sleep " + (16 - curHour) + " hour between 12 and 17 !");
                 }
-                Thread.sleep((16 - curHour) * 60 * 60 * 1000);
+                if (!TEST) {
+                    Thread.sleep((16 - curHour) * 60 * 60 * 1000);
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -368,7 +373,9 @@ public class NewsPushService extends Service {
                 if (DEBUG) {
                     Log.i(TAG, "thread sleep " + (20 - curHour) + " hour between 19 and 21 !");
                 }
-                Thread.sleep((20 - curHour) * 60 * 60 * 1000);
+                if (!TEST) {
+                    Thread.sleep((20 - curHour) * 60 * 60 * 1000);
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -377,7 +384,9 @@ public class NewsPushService extends Service {
                 if (DEBUG) {
                     Log.i(TAG, "thread sleep " + (23 - curHour) + " hour between 22 and 24 !");
                 }
-                Thread.sleep((23 - curHour) * 60 * 60 * 1000);
+                if (!TEST) {
+                    Thread.sleep((23 - curHour) * 60 * 60 * 1000);
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -387,6 +396,9 @@ public class NewsPushService extends Service {
     private void randomTime_10_12(int curHour, int curMinute) {
         if (!mSp.getBoolean(SP_KEY_NOTIFICATION_10_12_RANDOM_TIME, false)) {
             int radomMinute = mRandom.nextInt(60);
+            if (TEST) {
+                radomMinute = mRandom.nextInt(3);
+            }
             if (DEBUG) {
                 Log.i(TAG,
                       "SP_KEY_NOTIFICATION_10_12_RANDOM_TIME radomMinute = " + radomMinute);
@@ -433,6 +445,9 @@ public class NewsPushService extends Service {
     private void randomTime_17_19(int curHour, int curMinute) {
         if (!mSp.getBoolean(SP_KEY_NOTIFICATION_17_19_RANDOM_TIME, false)) {
             int radomMinute = mRandom.nextInt(60);
+            if (TEST) {
+                radomMinute = mRandom.nextInt(3);
+            }
             if (DEBUG) {
                 Log.i(TAG, "SP_KEY_NOTIFICATION_17_19_RANDOM_TIME radomMinute = " + radomMinute);
             }
@@ -479,6 +494,9 @@ public class NewsPushService extends Service {
     private void randomTime_21_22(int curHour, int curMinute) {
         if (!mSp.getBoolean(SP_KEY_NOTIFICATION_21_22_RANDOM_TIME, false)) {
             int radomMinute = mRandom.nextInt(60);
+            if (TEST) {
+                radomMinute = mRandom.nextInt(3);
+            }
             if (DEBUG) {
                 Log.i(TAG, "SP_KEY_NOTIFICATION_21_22_RANDOM_TIME radomMinute = " + radomMinute);
             }

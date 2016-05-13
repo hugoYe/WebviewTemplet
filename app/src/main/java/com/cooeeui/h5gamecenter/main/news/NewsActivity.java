@@ -111,14 +111,6 @@ public class NewsActivity extends Activity {
         }
         initWebViewSettings();
 
-        mWebView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                view.loadUrl(url);
-                return true;
-            }
-        });
-
         WebChromeClient webChromeClient = new WebChromeClient() {
 
             @Override
@@ -140,6 +132,14 @@ public class NewsActivity extends Activity {
             }
         };
         mWebView.setWebChromeClient(webChromeClient);
+
+        mWebView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                view.loadUrl(url);
+                return true;
+            }
+        });
 
         mCenterLayout = (FrameLayout) findViewById(R.id.ll_news_center);
         mCenterLayout.addView(mWebView, 0,
