@@ -3,6 +3,7 @@ package com.cooeeui.h5gamecenter.main.news;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -136,7 +137,18 @@ public class NewsActivity extends Activity {
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                view.loadUrl(url);
+                if (url.startsWith("geo:") || url.startsWith(WebView.SCHEME_MAILTO) || url
+                    .startsWith("market:") || url.startsWith("whatsapp:")) {
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setData(Uri.parse(url));
+                        startActivity(intent);
+                    } catch (android.content.ActivityNotFoundException e) {
+                        Log.e(TAG, "Error with " + url + ": " + e.toString());
+                    }
+                } else {
+                    view.loadUrl(url);
+                }
                 return true;
             }
         });
