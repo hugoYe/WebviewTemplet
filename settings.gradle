@@ -1,1 +1,1 @@
-include ':app',':downloaderlib'
+include ':H5GameCenter', ':downloaderlib', ':News'
