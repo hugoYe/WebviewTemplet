@@ -8,8 +8,8 @@ android {
         applicationId "com.cooeeui.h5gamecenter"
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 4
-        versionName "1.1.2"
+        versionCode 5
+        versionName "1.1.3"
         // dex突破65535的限制
         multiDexEnabled true
     }

@@ -3,6 +3,7 @@ package com.cooeeui.h5gamecenter.main;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.view.ViewGroup;
@@ -38,22 +39,30 @@ public class H5GameActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
-        // 横竖屏切换
-        int configOrientation = AssetsConfigUtil.getsInstance().getScreenOrientation();
-        if (configOrientation != -1) {
-            int currentOrientation = getRequestedOrientation();
-            if (currentOrientation != configOrientation) {
-                if (configOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                } else if (configOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                // 横竖屏切换
+                int configOrientation = AssetsConfigUtil.getsInstance().getScreenOrientation();
+                if (configOrientation != -1) {
+                    int currentOrientation = getRequestedOrientation();
+                    if (currentOrientation != configOrientation) {
+                        if (configOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
+                            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                        } else if (configOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+                            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                        }
+                    }
+                } else {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
                 }
             }
-        } else {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-        }
+        }, 1000);
+
+        super.onCreate(savedInstanceState);
+
     }
 
     @Override
