@@ -1,12 +1,17 @@
 package com.cooeeui.h5gamecenter.main;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.ViewGroup;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import com.cooeeui.h5gamecenter.R;
@@ -29,6 +34,23 @@ public class H5GameActivity extends BaseActivity {
     public void setUpContentViews() {
         setContentView(mWebView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                                             ViewGroup.LayoutParams.MATCH_PARENT));
+
+        mWebView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                Log.i("yezhennan", "url = " + url);
+                if (url.startsWith("geo:") || url.startsWith(WebView.SCHEME_MAILTO) || url
+                    .startsWith("market:") || url.startsWith("whatsapp:")) {
+                    Intent i = new Intent("android.intent.action.VIEW");
+                    i.setData(Uri.parse(url));
+                    startActivitySafely(i);
+
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
     }
 
     @Override
@@ -59,7 +81,7 @@ public class H5GameActivity extends BaseActivity {
                     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
                 }
             }
-        }, 1000);
+        }, 2000);
 
         super.onCreate(savedInstanceState);
 
@@ -82,6 +104,11 @@ public class H5GameActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
+        if (mWebView.canGoBack()) {
+            mWebView.goBack();
+            return;
+        }
+
         if (System.currentTimeMillis() - mExitTime > 2000) {
             Toast.makeText(this, R.string.exit_warn, Toast.LENGTH_SHORT)
                 .show();
@@ -98,5 +125,16 @@ public class H5GameActivity extends BaseActivity {
                 finish();
             }
         }
+    }
+
+    public boolean startActivitySafely(Intent intent) {
+        try {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            return true;
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, "App isn't installed.", Toast.LENGTH_SHORT).show();
+        }
+        return false;
     }
 }

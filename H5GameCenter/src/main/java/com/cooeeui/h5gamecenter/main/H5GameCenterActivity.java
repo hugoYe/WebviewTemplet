@@ -2,10 +2,14 @@ package com.cooeeui.h5gamecenter.main;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
@@ -77,7 +81,22 @@ public class H5GameCenterActivity extends BaseActivity {
         };
         mWebView.setWebChromeClient(webChromeClient);
 
-        mWebView.setWebViewClient(new WebViewClient());
+        mWebView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                Log.i("yezhennan", "url = " + url);
+                if (url.startsWith("geo:") || url.startsWith(WebView.SCHEME_MAILTO) || url
+                    .startsWith("market:") || url.startsWith("whatsapp:")) {
+                    Intent i = new Intent("android.intent.action.VIEW");
+                    i.setData(Uri.parse(url));
+                    startActivitySafely(i);
+
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
 
         mWebView.addJavascriptInterface(new JavaScriptObject(), "H5GameCenter");
     }
@@ -95,6 +114,11 @@ public class H5GameCenterActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
+        if (mWebView.canGoBack()) {
+            mWebView.goBack();
+            return;
+        }
+
         // 进入游戏中心5秒后才能操作返回键
         if (System.currentTimeMillis() - mBackKeyResponseTime > BACKKEY_RESPONSE_TIME) {
             if (System.currentTimeMillis() - mExitTime > 2000) {
@@ -168,5 +192,16 @@ public class H5GameCenterActivity extends BaseActivity {
         }
 
         return true;
+    }
+
+    public boolean startActivitySafely(Intent intent) {
+        try {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            return true;
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, "App isn't installed.", Toast.LENGTH_SHORT).show();
+        }
+        return false;
     }
 }
