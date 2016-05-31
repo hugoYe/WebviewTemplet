@@ -20,6 +20,7 @@ import com.cooeeui.news.R;
 import com.cooeeui.news.basecore.utils.AssetsConfigUtil;
 import com.cooeeui.news.basecore.views.NumberProgressBar;
 import com.umeng.analytics.MobclickAgent;
+import com.umeng.message.PushAgent;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -50,6 +51,11 @@ public class NewsActivity extends Activity {
         Intent serviceIntent = new Intent();
         serviceIntent.setClass(getApplicationContext(), NewsPushService.class);
         startService(serviceIntent);
+
+        // 友盟推送
+        PushAgent mPushAgent = PushAgent.getInstance(this);
+        mPushAgent.enable();
+        mPushAgent.onAppStart();
     }
 
 
