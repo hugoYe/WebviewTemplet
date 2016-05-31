@@ -18,6 +18,7 @@ import android.widget.RemoteViews;
 
 import com.cooeeui.news.R;
 import com.cooeeui.news.basecore.utils.AssetsConfigUtil;
+import com.umeng.analytics.MobclickAgent;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -35,7 +36,7 @@ public class NewsPushService extends Service {
 
     private static final String TAG = NewsPushService.class.getSimpleName();
     private static final boolean DEBUG = false;
-    private static final boolean TEST = false;
+    private static final boolean TEST = true;
 
     private static final String SP_FILE_NAME = "news_notification";
     private static final String SP_KEY_NOTIFICATION_10_12 = "news_notification_10_12";
@@ -53,10 +54,9 @@ public class NewsPushService extends Service {
     private SharedPreferences mSp;
 
     private Random mRandom = new Random();
-//    private ScreenReceiver mScreenReceiver = new ScreenReceiver();
-//    private static boolean screenIsOff;
 
     private static boolean sThreadIsRunning;
+    private Intent mMonitorService;
 
 
     public NewsPushService() {
@@ -72,8 +72,26 @@ public class NewsPushService extends Service {
     public void onCreate() {
         super.onCreate();
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            Notification.Builder builder = new Notification.Builder(this);
+            builder.setSmallIcon(R.mipmap.ic_launcher);
+            startForeground(410401, builder.build());
+            startService(new Intent(this, DaemonService.class));
+        } else {
+            startForeground(410401, new Notification());
+        }
+
+        mMonitorService = new Intent(this, MonitorService.class);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+
+        if (sThreadIsRunning) {
+            return START_STICKY;
+        }
+
         mSp = getSharedPreferences(SP_FILE_NAME, Context.MODE_PRIVATE);
-//        mScreenReceiver.registerScreenReceiver(getApplicationContext(), this);
 
         sThreadIsRunning = true;
 
@@ -81,6 +99,11 @@ public class NewsPushService extends Service {
             @Override
             public void run() {
                 while (sThreadIsRunning) {
+
+                    // 暂时关闭，因为Monitor线程很耗电
+//                    if (mMonitorService != null) {
+//                        startService(mMonitorService);
+//                    }
 
                     Calendar calendar = Calendar.getInstance();
                     int curHour = calendar.get(Calendar.HOUR_OF_DAY);
@@ -207,10 +230,6 @@ public class NewsPushService extends Service {
                 }
             }
         }.start();
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
 
         return START_STICKY;
     }
@@ -218,8 +237,6 @@ public class NewsPushService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-//        mScreenReceiver.unRegisterScreenReceiver(getApplicationContext());
 
         sThreadIsRunning = false;
     }
@@ -239,8 +256,14 @@ public class NewsPushService extends Service {
             urlConnection.setRequestProperty("Connection", "Keep-Alive");
             urlConnection.setRequestProperty("Charset", "UTF-8");
 
+            //请求Nano链接开始
+            MobclickAgent.onEvent(getApplicationContext(), "request_nano_url");
+
             urlConnection.connect();
             in = urlConnection.getInputStream();
+
+            //请求Nano链接成功
+            MobclickAgent.onEvent(getApplicationContext(), "request_nano_url_success");
 
             String res = inputStream2String(in);
 
@@ -253,8 +276,14 @@ public class NewsPushService extends Service {
             urlConnection.setRequestProperty("Connection", "Keep-Alive");
             urlConnection.setRequestProperty("Charset", "UTF-8");
 
+            //请求第三方链接开始
+            MobclickAgent.onEvent(getApplicationContext(), "request_url");
+
             urlConnection.connect();
             in = urlConnection.getInputStream();
+
+            //请求第三方链接成功
+            MobclickAgent.onEvent(getApplicationContext(), "request_url_success");
 
             res = inputStream2String(in);
 
@@ -304,6 +333,9 @@ public class NewsPushService extends Service {
     public boolean buildExpandedNotification(String title, String imgUrl, String url) {
         boolean result = false;
 
+        //创建通知开始
+        MobclickAgent.onEvent(getApplicationContext(), "notification_build_begin");
+
         try {
             Bitmap remotePic = null;
             remotePic = BitmapFactory.decodeStream(
@@ -333,6 +365,9 @@ public class NewsPushService extends Service {
             notificationManager.notify(mRandom.nextInt(100), notification);
 
             result = true;
+
+            //显示通知
+            MobclickAgent.onEvent(getApplicationContext(), "notification_show");
 
             if (DEBUG) {
                 Log.i(TAG, "buildExpandedNotification = " + result);
@@ -525,13 +560,4 @@ public class NewsPushService extends Service {
         }
     }
 
-//    @Override
-//    public void screenOn() {
-//        screenIsOff = false;
-//    }
-//
-//    @Override
-//    public void screenOff() {
-//        screenIsOff = true;
-//    }
 }

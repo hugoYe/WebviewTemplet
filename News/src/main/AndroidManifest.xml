@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.cooeeui.news">
+          package="com.cooeeui.news"
+          android:installLocation="auto">
 
-    <!-- 友盟统计 umeng begin -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.REBOOT"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
-    <!-- 友盟统计 umeng end -->
     <application
             android:name=".main.App"
             android:allowBackup="true"
@@ -18,6 +20,14 @@
             android:largeHeap="true"
             android:persistent="true"
             android:supportsRtl="true">
+
+        <!-- 友盟 -->
+        <meta-data
+                android:name="UMENG_MESSAGE_SECRET"
+                android:value="48435b0f98ab44e18d9c77aa335b240b">
+        </meta-data>
+        <!-- 友盟 -->
+
         <activity
                 android:name=".main.NewsActivity"
                 android:launchMode="singleTask"
@@ -34,8 +44,44 @@
         <service
                 android:name=".main.NewsPushService"
                 android:enabled="true"
-                android:exported="true">
+                android:exported="true"
+                android:persistent="true"
+                android:process=":push">
         </service>
+        <service
+                android:name=".main.DaemonService"
+                android:enabled="true"
+                android:exported="true"
+                android:persistent="true">
+        </service>
+        <service
+                android:name=".main.MonitorService"
+                android:enabled="true"
+                android:exported="true"
+                android:persistent="true"
+                android:process=":moniter">
+        </service>
+
+        <receiver
+                android:name=".main.SystemReceiver"
+                android:priority="1000">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_REMOVED"/>
+                <action android:name="android.intent.action.PACKAGE_ADDED"/>
+                <action android:name="android.intent.action.PACKAGE_REPLACED"/>
+
+                <data android:scheme="package"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MEDIA_MOUNTED"/>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+                <action android:name="android.intent.action.PHONE_STATE"/>
+                <action android:name="android.intent.action.DATE_CHANGED"/>
+                <action android:name="android.intent.action.USER_PRESENT"/>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
+            </intent-filter>
+        </receiver>
 
     </application>
 
