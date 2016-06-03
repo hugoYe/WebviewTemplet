@@ -36,7 +36,7 @@ public class NewsPushService extends Service {
 
     private static final String TAG = NewsPushService.class.getSimpleName();
     private static final boolean DEBUG = false;
-    private static final boolean TEST = true;
+    private static final boolean TEST = false;
 
     private static final String SP_FILE_NAME = "news_notification";
     private static final String SP_KEY_NOTIFICATION_10_12 = "news_notification_10_12";
@@ -297,6 +297,9 @@ public class NewsPushService extends Service {
             result = buildExpandedNotification(title, imgUrl, detailUrl);
         } catch (Exception e) {
             e.printStackTrace();
+
+            // 上传自己捕获的错误，（使用自定义错误，查看时请在错误列表页面选择【自定义错误】）
+            MobclickAgent.reportError(getApplicationContext(), e);
         } finally {
             if (in != null) {
                 try {
@@ -338,8 +341,27 @@ public class NewsPushService extends Service {
 
         try {
             Bitmap remotePic = null;
-            remotePic = BitmapFactory.decodeStream(
-                (InputStream) new URL(imgUrl).getContent());
+
+            URL bpUrl = new URL(imgUrl);
+            HttpURLConnection conn = (HttpURLConnection) bpUrl.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setReadTimeout(10000);
+            if (conn.getResponseCode() == 200) {
+                InputStream fis = conn.getInputStream();
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                byte[] bytes = new byte[1024];
+                int length = -1;
+                while ((length = fis.read(bytes)) != -1) {
+                    bos.write(bytes, 0, length);
+                }
+                byte[] picByte = bos.toByteArray();
+                bos.close();
+                fis.close();
+                remotePic = BitmapFactory.decodeByteArray(picByte, 0, picByte.length);
+            }
+
+//            remotePic = BitmapFactory.decodeStream(
+//                (InputStream) new URL(imgUrl).getContent());
 
             NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -372,8 +394,11 @@ public class NewsPushService extends Service {
             if (DEBUG) {
                 Log.i(TAG, "buildExpandedNotification = " + result);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+
+            // 上传自己捕获的错误，（使用自定义错误，查看时请在错误列表页面选择【自定义错误】）
+            MobclickAgent.reportError(getApplicationContext(), e);
         }
 
         return result;
